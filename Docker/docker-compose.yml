@@ -1,0 +1,5 @@
+
+name: mini-soc-run
+
+include: 
+- docker-compose.elasticsearch.yml
