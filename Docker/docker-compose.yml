@@ -1,5 +1,25 @@
+# =============================================================================
+# Point d'entrée de la stack mini-SOC (ELK + Suricata + Filebeat)
+# -----------------------------------------------------------------------------
+# Ce fichier assemble les compose "enfants"
+# via `include`, dans l'ordre logique de démarrage.
+#
+# Lancer toute la stack :
+#   docker compose up -d --build
+# =============================================================================
 
 name: mini-soc-run
 
-include: 
-- docker-compose.elasticsearch.yml
+include:
+  # 1) Génère (une fois) les certificats TLS CA / ES / Kibana dans ./certs
+  - docker-compose.setup-certs.yml
+  # 2) Démarre Elasticsearch (stockage + recherche des logs)
+  - docker-compose.elasticsearch.yml
+  # 3) Fixe le mot de passe du user kibana_system (requis pour Kibana)
+  - docker-compose.setup-passwords.yml
+  # 4) Interface web de visualisation / exploration des logs
+  - docker-compose.kibana.yml
+  # 5) Collecte les logs Suricata (eve.json) et les envoie vers Elasticsearch
+  - docker-compose.filebeat.yml
+  # 6) IDS/IPS : analyse le trafic réseau et écrit les alertes dans ./suricata/logs
+  - docker-compose.suricata.yml

@@ -1,0 +1,41 @@
+# =============================================================================
+# setup-certs — génération des certificats TLS du mini-SOC
+# -----------------------------------------------------------------------------
+# Conteneur "one-shot" (s'exécute puis s'arrête) qui prépare ./certs :
+#   - CA locale (ca.crt / ca.key)
+#   - certificat serveur Elasticsearch
+#   - certificat serveur Kibana
+#
+# Indispensable car ES / Kibana / Filebeat communiquent en HTTPS.
+# Si ./certs/ca/ca.crt existe déjà, rien n'est régénéré.
+#
+# Script : ./scripts/setup-certs.sh
+# =============================================================================
+
+services:
+  setup-certs:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: setup-certs
+    # root : nécessaire pour écrire dans /certs et corriger les permissions
+    user: "0"
+
+    environment:
+      # Chemin de elasticsearch-certutil (défini dans .env)
+      CERTUTIL: ${CERTUTIL}
+
+    # Évite le bash -c inline (apostrophes / YAML cassent Compose)
+    command: ["bash", "/scripts/setup-certs.sh"]
+
+    volumes:
+      # Persistance des certs sur l'hôte (partagés avec ES, Kibana, Filebeat)
+      - ./certs:/certs
+      - ./scripts/setup-certs.sh:/scripts/setup-certs.sh:ro
+
+    networks:
+      - elk_lan
+
+networks:
+  # Réseau Docker déjà créé hors compose (externe)
+  elk_lan:
+    external: true
+    name: elk_lan

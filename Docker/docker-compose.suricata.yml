@@ -1,0 +1,55 @@
+# =============================================================================
+# suricata — IDS (détection d'intrusion) réseau
+# -----------------------------------------------------------------------------
+# Capture le trafic sur les réseaux Docker (exploit_lan / worker_lan / elk_lan),
+# applique les règles (./suricata/rules) et écrit les événements JSON dans
+# ./suricata/logs/eve.json (consommés ensuite par Filebeat).
+# =============================================================================
+
+services:
+  suricata:
+    image: jasonish/suricata:8.0.7
+    container_name: suricata
+    hostname: SURICATA
+
+    # Capacités Linux nécessaires à la capture de paquets (AF_PACKET)
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_NICE
+
+    volumes:
+      # Config principale (suricata.yaml, classification, etc.)
+      - ./suricata/config:/etc/suricata
+      # Règles de détection (suricata.rules, …)
+      - ./suricata/rules:/var/lib/suricata/rules
+      # Sortie des logs (eve.json, fast.log, …) → lue par Filebeat
+      - ./suricata/logs:/var/log/suricata
+
+    networks:
+      # Branché sur plusieurs LANs pour voir le trafic lab (attaquant / worker / ELK)
+      - exploit_lan
+      - worker_lan
+      - elk_lan
+
+    command:
+      # Charge la config montée + capture via AF_PACKET (interfaces ethX)
+      - -c
+      - /etc/suricata/suricata.yaml
+      - --af-packet
+
+    restart: unless-stopped
+
+networks:
+  # Réseaux pré-créés hors de ce compose (externes au projet)
+  exploit_lan:
+    external: true
+    name: exploit_lan
+
+  worker_lan:
+    external: true
+    name: worker_lan
+
+  elk_lan:
+    external: true
+    name: elk_lan

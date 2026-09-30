@@ -1,28 +1,98 @@
+# =============================================================================
+# elasticsearch — moteur de stockage / indexation / recherche des logs
+# -----------------------------------------------------------------------------
+# Cœur de la stack ELK. Reçoit les événements Filebeat (logs Suricata),
+# les indexe, et les expose à Kibana via HTTPS :9200.
+#
+# Dépend de setup-certs (certificats TLS doivent exister avant le boot).
+# =============================================================================
+
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4
-    container_name: soc-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: ELASTICS
+    # Hostname résolu sur elk_lan (utilisé par Kibana / Filebeat : https://ELASTICS:9200)
+    hostname: ELASTICS
 
     environment:
+      - node.name=elasticsearch
+      # Mode mono-nœud (lab) : pas de formation de cluster multi-nodes
       - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - cluster.name=docker-cluster
+
+      # Active l'auth (users/roles) + chiffrement
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=true
+
+      # Empêche le swap de la JVM (recommandé par Elastic)
+      - bootstrap.memory_lock=true
+      # Heap JVM (adapter selon la RAM de la machine)
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+
+      # Mot de passe du user built-in "elastic" (lu au 1er démarrage uniquement)
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+
+      # =====================================================================
+      # Deux couches TLS distinctes (même fichiers .crt/.key, rôles différents)
+      # ---------------------------------------------------------------------
+      # 1) http.ssl     → trafic CLIENTS (navigateur, curl, Kibana, Filebeat)
+      #                   sur le port 9200.
+      #                  host : https://localhost:9200
+      #
+      # 2) transport.ssl → trafic INTERNE entre nœuds Elasticsearch.
+
+      # (1) HTTPS API REST — clients externes
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
+      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
+      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca/ca.crt
+      - xpack.security.http.ssl.verification_mode=certificate
+
+      # (2) TLS transport — liaison nœud ↔ nœud (requis avec security)
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt
+      - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key
+      - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca/ca.crt
+      - xpack.security.transport.ssl.verification_mode=certificate
+
+    ulimits:
+      # Complète bootstrap.memory_lock=true
+      memlock:
+        soft: -1
+        hard: -1
 
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      # Données persistantes (indices) sur l'hôte
+      - ./elasticS:/usr/share/elasticsearch/data
+      # Certificats générés par setup-certs (lecture seule)
+      - ./certs:/usr/share/elasticsearch/config/certs:ro
 
     ports:
+      # Accès API 
       - "9200:9200"
 
     networks:
-      - soc-net
+      - elk_lan
+
+    depends_on:
+      setup-certs:
+        condition: service_completed_successfully
+
+    # Les autres services (Kibana, Filebeat, setup-passwords) attendent ce healthcheck
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -u elastic:${ELASTICSEARCH_PASSWORD} https://localhost:9200 >/dev/null || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 40s
 
     restart: unless-stopped
 
-volumes:
-  elasticsearch-data:
-    name: soc-elasticsearch-data
-
 networks:
-  soc-net:
-    name: soc-net
+  elk_lan:
+    external: true
+    name: elk_lan

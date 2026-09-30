@@ -1,0 +1,63 @@
+# =============================================================================
+# kibana — interface web du SIEM / visualisation des logs
+# -----------------------------------------------------------------------------
+# UI accessible sur https://localhost:5601.
+# Se connecte à Elasticsearch en HTTPS avec le user kibana_system
+# (mot de passe préparé par setup-passwords).
+# =============================================================================
+
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    container_name: KIBANA
+    # Hostname résolu sur elk_lan (utilisé notamment par Filebeat setup.kibana)
+    hostname: KIBANA
+
+    environment:
+      SERVER_NAME: KIBANA
+      # Écoute sur toutes les interfaces du conteneur
+      SERVER_HOST: "0.0.0.0"
+      # URL Elasticsearch (hostname Docker + HTTPS)
+      ELASTICSEARCH_HOSTS: '["https://ELASTICS:9200"]'
+      # Compte service dédié (pas le super-user elastic)
+      ELASTICSEARCH_USERNAME: ${KIBANA_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD}
+
+      # Confiance en la CA locale pour valider le certificat d'ES
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/kibana/certs/ca/ca.crt
+      ELASTICSEARCH_SSL_VERIFICATIONMODE: full
+
+      # HTTPS côté navigateur / clients Kibana
+      SERVER_SSL_ENABLED: "true"
+      SERVER_SSL_CERTIFICATE: /usr/share/kibana/certs/kibana/kibana.crt
+      SERVER_SSL_KEY: /usr/share/kibana/certs/kibana/kibana.key
+
+      # Clés stables pour éviter la régénération aléatoire à chaque restart
+      # (sessions / saved objects / reporting invalidés sinon)
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTION_KEY}
+      XPACK_SECURITY_ENCRYPTIONKEY: ${KIBANA_ENCRYPTION_KEY}
+      XPACK_REPORTING_ENCRYPTIONKEY: ${KIBANA_ENCRYPTION_KEY}
+
+    volumes:
+      - ./certs:/usr/share/kibana/certs:ro
+
+    ports:
+      - "5601:5601"
+
+    networks:
+      - elk_lan
+
+    depends_on:
+      # ES doit répondre avant que Kibana tente de s'y connecter
+      elasticsearch:
+        condition: service_healthy
+      # kibana_system doit avoir le bon password avant le démarrage
+      setup-passwords:
+        condition: service_completed_successfully
+
+    restart: unless-stopped
+
+networks:
+  elk_lan:
+    external: true
+    name: elk_lan

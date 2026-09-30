@@ -1,0 +1,53 @@
+# =============================================================================
+# Configuration Filebeat — pipeline Suricata → Elasticsearch
+# -----------------------------------------------------------------------------
+# Copiée dans l'image via ./filebeat/Dockerfile.
+# Les variables ${...} sont injectées par docker-compose (environment).
+# =============================================================================
+
+# Entrée : lecture continue du journal EVE Suricata (JSON Lines)
+filebeat.inputs:
+  - type: filestream
+    enabled: true
+    id: suricata-eve
+    paths:
+      - /var/log/suricata/eve.json
+    parsers:
+      # Parse chaque ligne JSON et remonte les champs à la racine de l'event
+      - ndjson:
+          keys_under_root: true
+          add_error_key: true
+
+# Enrichissement : infos sur l'hôte Filebeat
+processors:
+  - add_host_metadata: ~
+
+# Destination principale : indexation dans Elasticsearch (HTTPS + auth)
+output.elasticsearch:
+  hosts: ["https://ELASTICS:9200"]
+  username: "${ELASTICSEARCH_USERNAME}"
+  password: "${ELASTICSEARCH_PASSWORD}"
+  ssl:
+    certificate_authorities:
+      - /usr/share/filebeat/certs/ca/ca.crt
+    verification_mode: full
+
+# Connexion à Kibana pour le setup (templates / dashboards éventuels)
+setup.kibana:
+  host: "https://KIBANA:5601"
+  username: "${KIBANA_USERNAME}"
+  password: "${KIBANA_PASSWORD}"
+  ssl:
+    certificate_authorities:
+      - /usr/share/filebeat/certs/ca/ca.crt
+    verification_mode: full
+
+# ILM + template d'index Filebeat (rétention / mapping)
+setup.ilm.enabled: true
+setup.template.enabled: true
+
+# File d'attente mémoire : envoi rapide dès qu'il y a quelques events
+queue.mem:
+  events: 4096
+  flush.min_events: 10
+  flush.timeout: 1s

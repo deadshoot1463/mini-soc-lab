@@ -1,0 +1,31 @@
+# Fichiers d'environnement & secrets
+.env
+.env.*
+!.env.example
+
+# Donnees runtime Elasticsearch (ne jamais committer)
+Docker/elasticS/
+
+# Certificats TLS generes (cles privees)
+Docker/certs/
+
+# Regles ET generees / volumineuses (faux positifs secret scanning)
+Docker/suricata/rules/suricata.rules
+
+# Logs Suricata
+Docker/suricata/logs/
+
+# Logs generiques
+logs/
+*.log
+
+# Docker Compose local
+docker-compose.override.yml
+
+# Editeurs & systeme
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.obsidian/
+Sans titre
