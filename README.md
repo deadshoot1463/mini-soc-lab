@@ -145,14 +145,14 @@ Elle couvre notamment :
 ### Phase 1 — Repository
 
 - [x]  Création du dépôt Git
-- [ ]  README
-- [ ]  `.gitignore`
+- [x]  README
+- [x]  `.gitignore`
 - [ ]  `.env.example`
 - [ ]  Documentation de l'architecture
 
 ### Phase 2 — Infrastructure
 
-- [ ]  Réseaux Docker
+- [x]  Réseaux Docker
 - [ ]  Elasticsearch
 - [ ]  Kibana
 - [ ]  Validation de la stack ELK
@@ -187,5 +187,5 @@ Elle couvre notamment :
 - [ ]  Documentation finale
 - [ ]  Démonstration complète
 ##  Auteur
-Projet personnel de cybersécurité réalisé dans le cadre d'un parcours ESGI 5.
+Projet personnel de cybersécurité réalisé dans le cadre d'un parcours ESGI 5 par
 Abdoul Hamani Bachir Seydou 
