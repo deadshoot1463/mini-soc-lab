@@ -4,7 +4,7 @@
 # Ce fichier assemble les compose "enfants"
 # via `include`, dans l'ordre logique de démarrage.
 #
-# Lancer toute la stack :
+# Pour lancer toute la stack :
 #   docker compose up -d --build
 # =============================================================================
 

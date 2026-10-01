@@ -183,7 +183,7 @@ Le fichier `docker-compose.setup-certs.yml` est utilisé pour la configuration d
 ---
 
 # Kibana
-
+![[Pasted image 20261001143212.png]]
 **Kibana** fournit l'interface web permettant d'explorer, rechercher et visualiser les données stockées dans Elasticsearch.
 
 Il permet notamment de construire des tableaux de bord et de faciliter l'analyse des événements de sécurité.

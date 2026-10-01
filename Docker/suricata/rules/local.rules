@@ -1,9 +1,8 @@
 # =============================================================================
-#  SOC-RUN — Règles Suricata (approche SOC réelle)
+#  SOC-RUN — Règles Suricata
 # =============================================================================
-#
 # 
-# Détecter les COMPORTEMENTS sur le réseau  ($HOME_NET / serveurs),
+# Détecter les COMPORTEMENTS sur les réseaux  ($HOME_NET / serveurs),
 # quelle que soit la source (any).
 #
 # $HOME_NET  = réseaux du lab (voir suricata.yaml)

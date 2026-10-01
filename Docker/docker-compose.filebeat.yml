@@ -14,7 +14,6 @@ services:
     # root : lecture des logs Suricata + écriture registry Filebeat
     user: root
     # Override du CMD de l'image officielle :
-    #   "-environment container" (un seul tiret) casse Filebeat 8.x
     # --strict.perms=false : assouplit le check de permissions sur filebeat.yml
     command: ["-e", "--environment", "container", "--strict.perms=false"]
 

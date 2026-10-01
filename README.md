@@ -140,7 +140,6 @@ Elle couvre notamment :
 - la réponse à incident ;
 - les scénarios de test.
 ##  Roadmap
-## Roadmap
 
 ### Phase 0 — Repository
 
@@ -159,11 +158,11 @@ Elle couvre notamment :
 
 ### Phase 2 — Détection
 
-- [ ]  Suricata
-- [ ]  Filebeat
-- [ ]  Ingestion des événements
-- [ ]  Dashboards Kibana
-- [ ]  Règles de détection
+- [x]  Suricata
+- [x]  Filebeat
+- [x]  Ingestion des événements
+- [x]  Dashboards Kibana
+- [x]  Règles de détection
 
 ### Phase 3 — SOAR
 

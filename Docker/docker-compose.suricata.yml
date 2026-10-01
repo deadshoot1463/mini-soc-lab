@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
 
 networks:
-  # Réseaux pré-créés hors de ce compose (externes au projet)
+  # Réseaux pré-créés hors de ce compose en debut du projet (externes au projet)
   exploit_lan:
     external: true
     name: exploit_lan

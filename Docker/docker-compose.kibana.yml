@@ -19,7 +19,7 @@ services:
       SERVER_HOST: "0.0.0.0"
       # URL Elasticsearch (hostname Docker + HTTPS)
       ELASTICSEARCH_HOSTS: '["https://ELASTICS:9200"]'
-      # Compte service dédié (pas le super-user elastic)
+      # Compte service dédié
       ELASTICSEARCH_USERNAME: ${KIBANA_USERNAME}
       ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD}
 
