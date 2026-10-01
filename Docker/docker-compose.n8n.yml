@@ -1,0 +1,52 @@
+# =============================================================================
+# n8n — automatisation / orchestration (workflows SOC)
+# -----------------------------------------------------------------------------
+# UI : http://localhost:5678
+# Branché sur elk_lan pour pouvoir appeler Elasticsearch / Kibana en interne.
+# Données persistantes : ./n8n/n8n_data
+# =============================================================================
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.41.5
+    container_name: n8n
+    hostname: n8n
+    restart: unless-stopped
+
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+
+    environment:
+      # URL publique vue depuis le navigateur
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: ${N8N_PORT:-5678}
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678/}
+
+      # Cookie sécurisé uniquement en HTTPS — obligatoire en false sur http://localhost
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-false}
+
+      # Chiffrement des credentials stockées (stable, ne pas régénérer)
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+
+      # Écoute dans le conteneur
+      N8N_LISTEN_ADDRESS: "0.0.0.0"
+
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-Europe/Paris}
+      TZ: ${TZ:-Europe/Paris}
+
+      # Atténue les warnings de dépréciation (lab)
+      N8N_RUNNERS_TASK_TIMEOUT: "300"
+      N8N_UNVERIFIED_PACKAGES_ENABLED: "true"
+
+    volumes:
+      - ./n8n/n8n_data:/home/node/.n8n
+      - ./n8n/local-files:/files
+
+    networks:
+      - elk_lan
+
+networks:
+  elk_lan:
+    external: true
+    name: elk_lan

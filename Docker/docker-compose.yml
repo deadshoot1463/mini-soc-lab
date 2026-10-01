@@ -23,3 +23,5 @@ include:
   - docker-compose.filebeat.yml
   # 6) IDS/IPS : analyse le trafic réseau et écrit les alertes dans ./suricata/logs
   - docker-compose.suricata.yml
+  # 7) Automatisation / workflows (n8n)
+  - docker-compose.n8n.yml
