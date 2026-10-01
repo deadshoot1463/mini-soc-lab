@@ -142,7 +142,7 @@ Elle couvre notamment :
 ##  Roadmap
 ## Roadmap
 
-### Phase 1 — Repository
+### Phase 0 — Repository
 
 - [x]  Création du dépôt Git
 - [x]  README
@@ -150,14 +150,14 @@ Elle couvre notamment :
 - [ ]  `.env.example`
 - [ ]  Documentation de l'architecture
 
-### Phase 2 — Infrastructure
+### Phase 1 — Infrastructure
 
 - [x]  Réseaux Docker
-- [ ]  Elasticsearch
-- [ ]  Kibana
-- [ ]  Validation de la stack ELK
+- [x]  Elasticsearch
+- [x]  Kibana
+- [x]  Validation de la stack ELK
 
-### Phase 3 — Détection
+### Phase 2 — Détection
 
 - [ ]  Suricata
 - [ ]  Filebeat
@@ -165,21 +165,21 @@ Elle couvre notamment :
 - [ ]  Dashboards Kibana
 - [ ]  Règles de détection
 
-### Phase 4 — SOAR
+### Phase 3 — SOAR
 
 - [ ]  Déploiement n8n
 - [ ]  Réception des alertes
 - [ ]  Workflow d'enrichissement
 - [ ]  Connexion CTI
 
-### Phase 5 — Réponse
+### Phase 4 — Réponse
 
 - [ ]  Playbook de remédiation
 - [ ]  Blocage / isolation
 - [ ]  Garde-fous contre les faux positifs
 - [ ]  Génération du rapport
 
-### Phase 6 — Documentation
+### Phase 5 — Documentation
 
 - [ ]  Scénarios d'attaque
 - [ ]  Captures d'écran
