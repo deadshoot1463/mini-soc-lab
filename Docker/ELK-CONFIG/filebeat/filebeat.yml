@@ -1,0 +1,80 @@
+# Filebeat : lit eve.json Suricata, mappe en ECS, envoie vers Elasticsearch
+
+filebeat.modules:
+  - module: suricata
+    eve:
+      enabled: true
+      var.paths:
+        - /var/log/suricata/eve.json
+      # forwarded : désactive host.name = hostname du conteneur Filebeat
+      var.tags: [suricata, forwarded]
+      # calcule network.community_id
+      var.community_id: true
+      # CIDR traités comme internes → remplit network.direction
+      var.internal_networks:
+        - private
+        - 192.30.10.0/24
+        - 10.30.10.0/24
+        - 172.30.10.0/24
+
+processors:
+  # ignore les lignes stats Suricata
+  - drop_event:
+      when:
+        equals:
+          suricata.eve.event_type: stats
+
+  # ajoute observer.* (identité de la sonde IDS)
+  - add_fields:
+      target: observer
+      fields:
+        hostname: "${OBSERVER_HOSTNAME:suricata}"
+        name: "${OBSERVER_NAME:suricata}"
+        type: ids
+        product: Suricata
+        vendor: OISF
+
+  # PTR DNS : source.ip → source.domain, destination.ip → destination.domain
+  - dns:
+      type: reverse
+      fields:
+        source.ip: source.domain
+        destination.ip: destination.domain
+      nameservers:
+        - ${DNS_NAMESERVERS:127.0.0.11}
+      timeout: 500ms
+      tag_on_failure: [_dns_reverse_failed]
+      ignore_failure: true
+
+# sortie HTTPS vers Elasticsearch
+output.elasticsearch:
+  hosts: ["https://ELASTICS:9200"]
+  username: "${ELASTICSEARCH_USERNAME}"
+  password: "${ELASTICSEARCH_PASSWORD}"
+  ssl:
+    certificate_authorities:
+      - /usr/share/filebeat/certs/ca/ca.crt
+    verification_mode: full
+
+# connexion Kibana pour charger templates / pipelines
+setup.kibana:
+  host: "https://KIBANA:5601"
+  username: "${KIBANA_USERNAME}"
+  password: "${KIBANA_PASSWORD}"
+  ssl:
+    certificate_authorities:
+      - /usr/share/filebeat/certs/ca/ca.crt
+    verification_mode: full
+
+setup.ilm.enabled: true
+setup.template.enabled: true
+setup.template.overwrite: false
+
+# buffer mémoire avant flush vers ES
+queue.mem:
+  events: 4096
+  flush.min_events: 10
+  flush.timeout: 1s
+
+logging.level: info
+logging.to_stderr: true

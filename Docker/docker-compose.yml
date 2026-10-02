@@ -1,27 +1,24 @@
 # =============================================================================
-# Point d'entrée de la stack mini-SOC (ELK + Suricata + Filebeat)
+# Point d'entrée de la stack mini-SOC (ELK + Suricata + Filebeat + Offensif)
 # -----------------------------------------------------------------------------
-# Ce fichier assemble les compose "enfants"
-# via `include`, dans l'ordre logique de démarrage.
+# Ce fichier assemble les compose "enfants" via `include`.
 #
-# Pour lancer toute la stack :
+# Lancer toute la stack :
 #   docker compose up -d --build
 # =============================================================================
 
 name: mini-soc-run
 
 include:
-  # 1) Génère (une fois) les certificats TLS CA / ES / Kibana dans ./certs
-  - docker-compose.setup-certs.yml
-  # 2) Démarre Elasticsearch (stockage + recherche des logs)
-  - docker-compose.elasticsearch.yml
-  # 3) Fixe le mot de passe du user kibana_system (requis pour Kibana)
-  - docker-compose.setup-passwords.yml
-  # 4) Interface web de visualisation / exploration des logs
-  - docker-compose.kibana.yml
-  # 5) Collecte les logs Suricata (eve.json) et les envoie vers Elasticsearch
-  - docker-compose.filebeat.yml
-  # 6) IDS/IPS : analyse le trafic réseau et écrit les alertes dans ./suricata/logs
-  - docker-compose.suricata.yml
-  # 7) Automatisation / workflows (n8n)
-  - docker-compose.n8n.yml
+  # --- ELK / détection ---
+  - ELK-CONFIG/docker-compose.setup-certs.yml
+  - ELK-CONFIG/docker-compose.elasticsearch.yml
+  - ELK-CONFIG/docker-compose.setup-passwords.yml
+  - ELK-CONFIG/docker-compose.kibana.yml
+  - ELK-CONFIG/docker-compose.filebeat.yml
+  - ELK-CONFIG/docker-compose.suricata.yml
+  - ELK-CONFIG/docker-compose.n8n.yml
+
+  # --- Lab offensif (attaquant + cible) ---
+  - OFFENSIF-CONFIG/docker-compose.kali.yml
+  - OFFENSIF-CONFIG/docker-compose.victime.yml

@@ -1,0 +1,20 @@
+$TTL    604800
+@       IN      SOA     victime.local. root.victime.local. (
+                              3         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+
+; NS
+@       IN      NS      ns.victime.local.
+
+; A — worker_lan (lab SOC-RUN)
+@       IN      A       10.30.10.20
+ns      IN      A       10.30.10.20
+www     IN      A       10.30.10.20
+ftp     IN      A       10.30.10.20
+ssh     IN      A       10.30.10.20
+admin   IN      A       10.30.10.20
+secret  IN      A       10.30.10.20
+dvwa    IN      A       10.30.10.20

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abdoul Lab mini-SOC · Portail employé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1220;
+    --bg-2: #121a2b;
+    --panel: #172235;
+    --line: #2a3a55;
+    --text: #e7eefc;
+    --muted: #93a0b8;
+    --accent: #3dd6c6;
+    --accent-2: #f0a202;
+    --danger: #ff6b6b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    color: var(--text);
+    background:
+      linear-gradient(160deg, rgba(61,214,198,0.08), transparent 40%),
+      linear-gradient(0deg, var(--bg), var(--bg-2));
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 6vw; border-bottom: 1px solid var(--line);
+    background: rgba(11,18,32,0.9); position: sticky; top: 0; z-index: 5;
+  }
+  .brand strong { font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .brand span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .top-links { display: flex; gap: 20px; list-style: none; font-size: 14px; color: var(--muted); }
+  .top-links a:hover { color: var(--accent); }
+  .badge {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    border: 1px solid var(--accent-2); color: var(--accent-2); padding: 6px 10px;
+  }
+
+  .hero {
+    padding: 64px 6vw 40px;
+    display: grid; grid-template-columns: 1.25fr 0.85fr; gap: 36px; align-items: stretch;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 5vw, 56px); line-height: 1.05; max-width: 14ch; font-weight: 600;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { margin-top: 16px; color: var(--muted); line-height: 1.6; max-width: 48ch; }
+  .cta-row { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; padding: 11px 16px; font-size: 14px;
+    border: 1px solid var(--line); background: transparent; transition: 0.15s ease;
+  }
+  .btn.primary { background: var(--accent); color: #06241f; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.05); }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); padding: 20px;
+  }
+  .panel h2 {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+  }
+  .meta { list-style: none; display: grid; gap: 10px; font-size: 14px; }
+  .meta li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+  .meta code { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--accent-2); }
+
+  .section { padding: 20px 6vw 56px; }
+  .section-head { display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 16px; }
+  .section-head h2 { font-size: 28px; font-weight: 600; }
+  .section-head p { color: var(--muted); font-size: 14px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); padding: 18px; min-height: 160px;
+    display: flex; flex-direction: column; gap: 8px; transition: 0.15s ease;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+  .card h3 { font-size: 18px; }
+  .card p { color: var(--muted); font-size: 14px; line-height: 1.45; flex: 1; }
+  .path { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--accent-2); }
+
+  .notice {
+    margin-top: 16px; border: 1px solid var(--line); border-left: 3px solid var(--danger);
+    background: rgba(255,107,107,0.08); padding: 14px 16px; color: var(--muted); font-size: 13px; line-height: 1.5;
+  }
+  .notice strong { color: var(--danger); }
+  .notice code { font-family: "IBM Plex Mono", monospace; color: var(--accent-2); }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 16px 6vw 28px;
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    color: var(--muted); font-size: 12px;
+  }
+
+  @media (max-width: 900px) {
+    .hero, .grid { grid-template-columns: 1fr; }
+    .top-links { display: none; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <strong>Abdoul Intra</strong>
+      <span>Portail employé · Lab SOC-RUN</span>
+    </div>
+    <ul class="top-links">
+      <li><a href="#apps">Applications</a></li>
+      <li><a href="#surface">Services</a></li>
+      <li><a href="/dvwa/">DVWA</a></li>
+    </ul>
+    <div class="badge">PEDAGO · VULNÉRABLE</div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Portail interne <em>SOC-RUN</em></h1>
+      <p>
+        Machine cible du lab mini-SOC. Services volontairement mal configurés
+        pour générer du trafic détectable par Suricata (HTTP, SSH, DNS, FTP).
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="/dvwa/">Ouvrir DVWA</a>
+        <a class="btn ghost" href="/admin/">Admin</a>
+        <a class="btn ghost" href="/backup/">Backups</a>
+      </div>
+    </div>
+    <aside class="panel">
+      <h2>Identité machine</h2>
+      <ul class="meta">
+        <li><span>Hostname</span><code>victime</code></li>
+        <li><span>Réseau</span><code>worker_lan /24</code></li>
+        <li><span>IP lab</span><code>10.30.10.20</code></li>
+        <li><span>HTTP hôte</span><code>localhost:8080</code></li>
+        <li><span>SSH hôte</span><code>localhost:2222 · root/root</code></li>
+        <li><span>FTP hôte</span><code>localhost:2121 · anonymous</code></li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="section" id="apps">
+    <div class="section-head">
+      <h2>Applications internes</h2>
+      <p>Points d’entrée pour énumération / exploitation contrôlée</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="/dvwa/">
+        <div class="tag">Web</div>
+        <h3>DVWA</h3>
+        <p>SQLi, XSS, command injection, LFI. Login : admin / password.</p>
+        <div class="path">/dvwa/</div>
+      </a>
+      <a class="card" href="/admin/">
+        <div class="tag">Recon</div>
+        <h3>Admin panel</h3>
+        <p>Répertoire sensible à trouver avec gobuster / dirb.</p>
+        <div class="path">/admin/</div>
+      </a>
+      <a class="card" href="/backup/">
+        <div class="tag">Fuite</div>
+        <h3>Backups</h3>
+        <p>Sauvegardes exposées sans authentification.</p>
+        <div class="path">/backup/</div>
+      </a>
+      <a class="card" href="/secret/config.txt">
+        <div class="tag">Secret</div>
+        <h3>Config secrète</h3>
+        <p>Clé en clair dans un chemin accessible.</p>
+        <div class="path">/secret/config.txt</div>
+      </a>
+      <a class="card" href="/.git/HEAD">
+        <div class="tag">Source</div>
+        <h3>.git exposé</h3>
+        <p>Métadonnées Git publiques — mauvais déploiement typique.</p>
+        <div class="path">/.git/HEAD</div>
+      </a>
+      <a class="card" href="#surface">
+        <div class="tag">Réseau</div>
+        <h3>SSH · DNS · FTP</h3>
+        <p>Vecteurs non-web pour les règles Suricata du lab.</p>
+        <div class="path">22 / 53 / 21</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="section" id="surface">
+    <div class="section-head">
+      <h2>Surface d’attaque</h2>
+      <p>Depuis Kali : <code style="color:var(--accent-2)">siem-tests.sh</code></p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="tag">HTTP</div>
+        <h3>Enum web</h3>
+        <p>Gobuster / Nikto vers la victime.</p>
+        <div class="path">gobuster dir -u http://10.30.10.20 ...</div>
+      </div>
+      <div class="card">
+        <div class="tag">Auth</div>
+        <h3>SSH brute</h3>
+        <p>Hydra sur root:root.</p>
+        <div class="path">hydra -l root -p root ssh://10.30.10.20</div>
+      </div>
+      <div class="card">
+        <div class="tag">DNS</div>
+        <h3>Flood / enum</h3>
+        <p>dns-flood.sh + dnsrecon sur victime.local.</p>
+        <div class="path">dns-flood.sh 10.30.10.20 500</div>
+      </div>
+    </div>
+    <div class="notice">
+      <strong>Rappel lab :</strong> cible volontairement vulnérable.
+      Alertes attendues dans Kibana (Suricata → Filebeat → Elasticsearch).
+      Attaquant Kali <code>192.30.10.14</code> · Victime <code>10.30.10.20</code>.
+    </div>
+  </section>
+
+  <footer>
+    <div>Abdoul Intra · SOC-RUN / ESGI</div>
+    <div>worker_lan · 10.30.10.20 · usage pédagogique uniquement</div>
+  </footer>
+</body>
+</html>

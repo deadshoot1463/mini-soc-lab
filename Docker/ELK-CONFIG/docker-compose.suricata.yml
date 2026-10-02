@@ -1,22 +1,29 @@
 # =============================================================================
 # suricata — IDS (détection d'intrusion) réseau
 # -----------------------------------------------------------------------------
-# Capture le trafic sur les réseaux Docker (exploit_lan / worker_lan / elk_lan),
-# applique les règles (./suricata/rules) et écrit les événements JSON dans
-# ./suricata/logs/eve.json (consommés ensuite par Filebeat).
+# Partage le network namespace de `victime` (sidecar) pour voir le trafic
+# kali → victime sur worker_lan. Sur un bridge Docker classique, un conteneur
+# AF_PACKET isolé ne voit PAS le trafic entre deux autres conteneurs.
+#
+# Les logs restent sur volume ./suricata/logs (lus par Filebeat via bind-mount).
 # =============================================================================
 
 services:
   suricata:
     image: jasonish/suricata:8.0.7
     container_name: suricata
-    hostname: SURICATA
+    # pas de hostname : incompatible avec network_mode: service:*
 
     # Capacités Linux nécessaires à la capture de paquets (AF_PACKET)
     cap_add:
       - NET_ADMIN
       - NET_RAW
       - SYS_NICE
+
+    # Sidecar victime : voit toutes les connexions vers/depuis 10.30.10.20
+    network_mode: "service:victime"
+    depends_on:
+      - victime
 
     volumes:
       # Config principale (suricata.yaml, classification, etc.)
@@ -26,30 +33,10 @@ services:
       # Sortie des logs (eve.json, fast.log, …) → lue par Filebeat
       - ./suricata/logs:/var/log/suricata
 
-    networks:
-      # Branché sur plusieurs LANs pour voir le trafic lab (attaquant / worker / ELK)
-      - exploit_lan
-      - worker_lan
-      - elk_lan
-
     command:
-      # Charge la config montée + capture via AF_PACKET (interfaces ethX)
+      # eth0 = interface worker_lan de la victime (namespace partagé)
       - -c
       - /etc/suricata/suricata.yaml
-      - --af-packet
+      - --af-packet=eth0
 
     restart: unless-stopped
-
-networks:
-  # Réseaux pré-créés hors de ce compose en debut du projet (externes au projet)
-  exploit_lan:
-    external: true
-    name: exploit_lan
-
-  worker_lan:
-    external: true
-    name: worker_lan
-
-  elk_lan:
-    external: true
-    name: elk_lan

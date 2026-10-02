@@ -1,0 +1,48 @@
+# =============================================================================
+# kali — machine attaquante (lab SOC-RUN)
+# -----------------------------------------------------------------------------
+# Réseaux :
+#   exploit_lan  192.30.10.14  (segment offensif)
+#   worker_lan                 (accès à la victime 10.30.10.20)
+#
+# Shell interactif :
+#   docker exec -it kali bash
+#   siem-tests.sh
+# =============================================================================
+
+services:
+  kali:
+    build: ./kali
+    container_name: kali
+    hostname: kali
+    tty: true
+    stdin_open: true
+
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    environment:
+      VICTIME_IP: ${VICTIME_IP:-10.30.10.20}
+      VICTIME_HOST: ${VICTIME_HOST:-victime}
+      TZ: ${TZ:-Europe/Paris}
+
+    volumes:
+      # Workspace attaquant (scripts, loot, wordlists custom)
+      - ./kali/data:/root/workspace
+
+    networks:
+      exploit_lan:
+        ipv4_address: ${KALI_IP:-192.30.10.14}
+      worker_lan:
+
+    restart: unless-stopped
+
+networks:
+  exploit_lan:
+    external: true
+    name: exploit_lan
+
+  worker_lan:
+    external: true
+    name: worker_lan

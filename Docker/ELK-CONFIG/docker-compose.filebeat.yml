@@ -1,0 +1,46 @@
+# Conteneur Filebeat : collecte eve.json Suricata → Elasticsearch
+
+services:
+  filebeat:
+    build: ./filebeat
+    container_name: filebeat
+    hostname: filebeat
+
+    # root requis pour lire /var/log/suricata et écrire le registry
+    user: root
+    # setup charge les pipelines ingest Suricata, puis démarre Filebeat
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        filebeat setup --pipelines --modules suricata -e --strict.perms=false
+        exec filebeat -e --environment container --strict.perms=false
+
+    environment:
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      KIBANA_USERNAME: ${KIBANA_USERNAME}
+      KIBANA_PASSWORD: ${KIBANA_PASSWORD}
+      OBSERVER_HOSTNAME: ${OBSERVER_HOSTNAME:-suricata-lab-01}
+      OBSERVER_NAME: ${OBSERVER_NAME:-suricata-lab-01}
+      DNS_NAMESERVERS: ${DNS_NAMESERVERS:-127.0.0.11}
+
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./suricata/logs:/var/log/suricata:ro
+      - ./certs:/usr/share/filebeat/certs:ro
+
+    networks:
+      - elk_lan
+
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_started
+
+    restart: unless-stopped
+
+networks:
+  elk_lan:
+    external: true
+    name: elk_lan

@@ -1,0 +1,39 @@
+# =============================================================================
+# victime — machine cible vulnérable (lab SOC-RUN)
+# -----------------------------------------------------------------------------
+# Services exposés : HTTP(DVWA) · SSH · DNS · FTP anonyme
+# Réseau : worker_lan → 10.30.10.20
+#
+# Accès depuis l'hôte :
+#   http://localhost:8080
+#   ssh root@localhost -p 2222   (root/root)
+#   ftp localhost 2121           (anonymous)
+# =============================================================================
+
+services:
+  victime:
+    build: ./victime
+    container_name: victime
+    hostname: victime
+
+    ports:
+      - "8080:80"       # HTTP / DVWA / site vitrine
+      - "2222:22"       # SSH (root:root)
+      - "53535:53/udp"  # DNS (depuis l'hôte)
+      - "53535:53/tcp"
+      - "2121:21"       # FTP
+      - "40000-40100:40000-40100"  # FTP passif
+
+    environment:
+      TZ: ${TZ:-Europe/Paris}
+
+    networks:
+      worker_lan:
+        ipv4_address: ${VICTIME_IP:-10.30.10.20}
+
+    restart: unless-stopped
+
+networks:
+  worker_lan:
+    external: true
+    name: worker_lan
